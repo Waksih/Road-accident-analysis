@@ -1,0 +1,1 @@
+this is the analysis for the road accidents that occurred in the years 2016 and 2017. the analyis consists of graphs that show the most frequent places the accidents took place and at what time the accidents mostly took place.
