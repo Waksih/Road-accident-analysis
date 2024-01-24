@@ -1,12 +1,22 @@
 install.packages("tidyverse")
 library(tidyverse)
+library(readxl)
+
+kenya_accidents_database_xlsx_1 <- read_excel("kenya-accidents-database-xlsx-1.xlsx", +     sheet = "2016")
+
 
 rd_16<-kenya_accidents_database_xlsx_1
 View(rd_16)
-rd_17 <- read_excel("C:/Users/kokon/Downloads/openafrica-8288bf4a-1ec3-454d-a201-3b7e4c623063/openafrica-8288bf4a-1ec3-454d-a201-3b7e4c623063/original/kenya-accidents-database-xlsx-1.xlsx", 
-                    +     sheet = "2017")
+
+kenya_accidents_database_xlsx_1 <- read_excel("kenya-accidents-database-xlsx-1.xlsx", 
+                                                +     sheet = "2017")
+
+rd_17<-kenya_accidents_database_xlsx_1
+View(rd_17)
+
 str(rd_16)
 str(rd_17)
+
 glimpse(rd_16)
 glimpse(rd_17)
 names(rd_16)
