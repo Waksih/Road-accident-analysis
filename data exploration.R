@@ -37,3 +37,34 @@ ggplot(monthly_casualties2, aes(x = Month, y = Total_casualties))+
        y = "NUMBER OF CASUALTIES")+
   theme_minimal()+
   theme(axis.text.x= element_text(angle = 90, hjust = 1))
+
+
+#find out the number of casualties per county
+county_casualties<- rd_16 %>% 
+  filter(!is.na(COUNTY)) %>% 
+  group_by(COUNTY) %>% 
+  summarise(total_cas = sum(NO., na.rm = TRUE)) %>% 
+  arrange(desc(total_cas)) #Arrange in descending order of total casualties
+ 
+ggplot(county_casualties, aes(x = total_cas, y = reorder(COUNTY, total_cas))) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Number of Casualties Per County",
+       x = "County",
+       y = "Number of Casualties") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Rotate x-axis labels for better readability
+
+
+county_casualties2<- rd_17 %>% 
+  filter(!is.na(COUNTY)) %>% 
+  group_by(COUNTY) %>% 
+  summarise(total_cas = sum(NO., na.rm = TRUE)) %>% 
+  arrange(desc(total_cas)) #Arrange in descending order of total casualties
+
+ggplot(county_casualties2, aes(x = total_cas, y = reorder(COUNTY, total_cas))) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Number of Casualties Per County",
+       x = "County",
+       y = "Number of Casualties") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))  # Rotate x-axis labels for better readability
