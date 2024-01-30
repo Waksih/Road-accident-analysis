@@ -73,7 +73,7 @@ ggplot(county_casualties2, aes(x = total_cas, y = reorder(COUNTY, total_cas))) +
 #aggregate number of accidents by road and county
 accident_by_road <- rd_16 %>% 
   group_by(ROAD,COUNTY) %>% 
-  summarise(Total_accidents = n()) %>%  #shorthand for counting no. of observations within each group
+  summarise(Total_accidents = n(), Total_casualties = sum(NO., na.rm=TRUE)) %>%  #shorthand for counting no. of observations within each group
   arrange(desc(Total_accidents))
 
 top_accidents <- head(accident_by_road, 10)
@@ -81,7 +81,7 @@ top_accidents
 
 accident_by_road2 <- rd_17 %>% 
   group_by(ROAD,COUNTY) %>% 
-  summarise(Total_accidents = n()) %>%  #shorthand for counting no. of observations within each group
+  summarise(Total_accidents = n(), Total_casualties = sum(NO., na.rm=TRUE)) %>%  #shorthand for counting no. of observations within each group
   arrange(desc(Total_accidents))
 
 top_accidents2 <- head(accident_by_road2, 10)
