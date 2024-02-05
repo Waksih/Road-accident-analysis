@@ -27,7 +27,7 @@ names(rd_17)
 #delete the unnecessary column from both datasets
 rd_16<-rd_16[,-13]
 rd_17<-rd_17[,-15]
-
+rd_17<-rd_17[,c(-6,-8)] #delete the columns not found in rd_16
 
 #change the classes of the columns to b suitable for analysis
 rd_16$COUNTY<-as.factor(rd_16$COUNTY)
