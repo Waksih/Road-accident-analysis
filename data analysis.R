@@ -111,11 +111,13 @@ accidents_btwn_7to9 <- combined_data %>%
 accident_cause <- accidents_btwn_7to9$`BRIEF ACCIDENT DETAILS`
 View(sort(table(accident_cause), decreasing = TRUE)) #sort the causes of accidents
 
-#INVESTIGATING WHETHER TIME OF DAY AND ROAD INFLUENCE NUMBER OF CASUALTIES
+#INVESTIGATING WHETHER TIME OF DAY AND CAUSE CODE INFLUENCE NUMBER OF CASUALTIES
 #preparing the dataset
 model_data <- combined_data %>% 
-  select(NO., Time_Category, ROAD) %>% 
-  mutate(Time_Category = factor(Time_Category),
-         ROAD = factor(ROAD))#convert to factor for regression
+  select(NO., Hour, `CAUSE CODE`) %>% 
+  filter(complete.cases(.))
+  
+  
 #model building
-model <- lm
+model <- lm(NO.~ `CAUSE CODE` + Hour , data = model_data )
+summary(model)
