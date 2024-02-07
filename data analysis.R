@@ -1,6 +1,11 @@
 library(lubridate)
-install.packages("scales")
+install.packages("categoryEncoders")
 library(scales)
+library(stringi)
+library(data.table)
+library(hash)
+library(vtreat)
+
 
 #extract the hour component and find the mean and median of accident times
 hr<-hour(rd_16$`TIME 24 HOURS`)
@@ -114,10 +119,47 @@ View(sort(table(accident_cause), decreasing = TRUE)) #sort the causes of acciden
 #INVESTIGATING WHETHER TIME OF DAY AND CAUSE CODE INFLUENCE NUMBER OF CASUALTIES
 #preparing the dataset
 model_data <- combined_data %>% 
-  select(NO., Hour, `CAUSE CODE`) %>% 
+  select(NO., Hour, ROAD, COUNTY) %>% 
+  mutate(ROAD = as.factor(ROAD), COUNTY = as.factor(COUNTY)) %>% 
   filter(complete.cases(.))
   
-  
+
+#convert the categorical variables to dummy data
+#use feature hashing
+num_features <- 100 #define number of features
+
+#perform feature hashing for ROAD
+model_data$hashed_ROAD <- sapply(model_data$ROAD, function(x) hash(x) %% num_features)
+
+#perform target encoding for COUNTY
+
+# Calculate the mean of the target variable for each category in the `county` column
+county_means <- aggregate(NO. ~ COUNTY, data = model_data, FUN = mean)
+
+# Merge the mean target values back into the original dataframe
+model_data <- merge(model_data, county_means, by = "COUNTY", suffixes = c("", "_mean"))
+
+# Replace the `county` categories with their corresponding mean target values
+model_data$COUNTY_ENCODED <- model_data$NO._mean
+
+# Drop the intermediate column
+model_data <- model_data[, !(names(model_data) %in% c("NO._mean"))]
+
+# Check the encoded dataframe
+head(model_data, 20)
+
+
+
+
+
+
+
+
+
+
+
+
+
 #model building
 model <- lm(NO.~ `CAUSE CODE` + Hour , data = model_data )
 summary(model)
