@@ -125,11 +125,30 @@ model_data <- combined_data %>%
   
 
 #convert the categorical variables to dummy data
-#use feature hashing
-num_features <- 100 #define number of features
 
+#use feature hashing
 #perform feature hashing for ROAD
-model_data$hashed_ROAD <- sapply(model_data$ROAD, function(x) hash(x) %% num_features)
+# Preprocess the ROAD column: remove special characters and normalize to lowercase
+model_data$ROAD <- tolower(gsub("[^[:alnum:] ]", "", model_data$ROAD))
+
+# Remove spaces from road names
+model_data$ROAD <- gsub(" ", "", model_data$ROAD)
+
+# Perform feature hashing for ROAD
+num_features <- 596 # define number of features
+
+feature_hash <- function(x, num_features) {
+  hash_value <- digest(x)
+  hash_integer <- sum(utf8ToInt(hash_value))  # Sum of Unicode code points
+  return(hash_integer %% num_features + 1)
+}
+
+# Apply the feature hashing function to each element of the ROAD column
+model_data$hashed_ROAD <- sapply(model_data$ROAD, feature_hash, num_features)
+
+# Check the dataframe with hashed ROAD
+View(head(model_data))
+
 
 #perform target encoding for COUNTY
 
@@ -146,18 +165,7 @@ model_data$COUNTY_ENCODED <- model_data$NO._mean
 model_data <- model_data[, !(names(model_data) %in% c("NO._mean"))]
 
 # Check the encoded dataframe
-head(model_data, 20)
-
-
-
-
-
-
-
-
-
-
-
+View(head(model_data, 20))
 
 
 #model building
