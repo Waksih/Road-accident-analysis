@@ -1,10 +1,8 @@
 library(lubridate)
-install.packages("categoryEncoders")
 library(scales)
 library(stringi)
 library(data.table)
-library(hash)
-library(vtreat)
+library(digest)
 
 
 #extract the hour component and find the mean and median of accident times
@@ -56,7 +54,10 @@ acc_by_category2 <- rd_17 %>%
 acc_by_category2 # display the counts
 
 
+#HYPOTHESIS TESTING
+
 #INVESTIGATE WHETHER THE TIME OF DAY AFFECTS THE SEVERITY OF ACCIDENTS
+
 #Use hypothesis testing to compare the mean no. of victims during the day and those at night
 combined_data <- bind_rows(rd_16, rd_17) #combine the datasets
 View(combined_data)
@@ -116,58 +117,5 @@ accidents_btwn_7to9 <- combined_data %>%
 accident_cause <- accidents_btwn_7to9$`BRIEF ACCIDENT DETAILS`
 View(sort(table(accident_cause), decreasing = TRUE)) #sort the causes of accidents
 
-#INVESTIGATING WHETHER TIME OF DAY AND CAUSE CODE INFLUENCE NUMBER OF CASUALTIES
-#preparing the dataset
-model_data <- combined_data %>% 
-  select(NO., Hour, ROAD, COUNTY) %>% 
-  mutate(ROAD = as.factor(ROAD), COUNTY = as.factor(COUNTY)) %>% 
-  filter(complete.cases(.))
-  
-
-#convert the categorical variables to dummy data
-
-#use feature hashing
-#perform feature hashing for ROAD
-# Preprocess the ROAD column: remove special characters and normalize to lowercase
-model_data$ROAD <- tolower(gsub("[^[:alnum:] ]", "", model_data$ROAD))
-
-# Remove spaces from road names
-model_data$ROAD <- gsub(" ", "", model_data$ROAD)
-
-# Perform feature hashing for ROAD
-num_features <- 596 # define number of features
-
-feature_hash <- function(x, num_features) {
-  hash_value <- digest(x)
-  hash_integer <- sum(utf8ToInt(hash_value))  # Sum of Unicode code points
-  return(hash_integer %% num_features + 1)
-}
-
-# Apply the feature hashing function to each element of the ROAD column
-model_data$hashed_ROAD <- sapply(model_data$ROAD, feature_hash, num_features)
-
-# Check the dataframe with hashed ROAD
-View(head(model_data))
 
 
-#perform target encoding for COUNTY
-
-# Calculate the mean of the target variable for each category in the `county` column
-county_means <- aggregate(NO. ~ COUNTY, data = model_data, FUN = mean)
-
-# Merge the mean target values back into the original dataframe
-model_data <- merge(model_data, county_means, by = "COUNTY", suffixes = c("", "_mean"))
-
-# Replace the `county` categories with their corresponding mean target values
-model_data$COUNTY_ENCODED <- model_data$NO._mean
-
-# Drop the intermediate column
-model_data <- model_data[, !(names(model_data) %in% c("NO._mean"))]
-
-# Check the encoded dataframe
-View(head(model_data, 20))
-
-
-#model building
-model <- lm(NO.~ `CAUSE CODE` + Hour , data = model_data )
-summary(model)
